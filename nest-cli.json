@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/playce/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "builder": "webpack",
+    "tsConfigPath": "apps/playce/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/playce",
+  "projects": {
+    "playce": {
+      "type": "application",
+      "root": "apps/playce",
+      "entryFile": "main",
+      "sourceRoot": "apps/playce/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/playce/tsconfig.app.json"
+      }
+    },
+    "lib": {
+      "type": "library",
+      "root": "libs/lib",
+      "entryFile": "index",
+      "sourceRoot": "libs/lib/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/lib/tsconfig.lib.json"
+      }
+    }
+  }
+}
