@@ -27,7 +27,18 @@ export class AlbumsService {
     return await this.albumService.createAlbum(createAlbumDTO);
   }
 
-  async getAlbumInfo(albumCode: string): Promise<Album | undefined> {
-    return await this.albumService.getAlbum({ albumCode });
+  async getAlbumInfo(
+    userId: string,
+    albumId: string,
+  ): Promise<{ album: Album; own: boolean } | undefined> {
+    const album = await this.albumService.getAlbum({ id: albumId });
+    const ownerShip = userId
+      ? await this.albumService.getAlbumOwnership(userId, album.id)
+      : false;
+
+    return {
+      album,
+      own: ownerShip,
+    };
   }
 }

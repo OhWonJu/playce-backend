@@ -74,13 +74,6 @@ export class AlbumService {
       where: albumWhereUniqueInput,
       include: {
         tracks: {
-          select: {
-            id: true,
-            trackTitle: true,
-            trackNumber: true,
-            trackTime: true,
-            trackURL: true,
-          },
           orderBy: {
             trackNumber: "asc",
           },
@@ -89,6 +82,25 @@ export class AlbumService {
         artist: { select: { artistInfo: true, artistName: true, id: true } },
       },
     });
+  }
+
+  async getAlbumOwnership(userId: string, albumId: string): Promise<boolean> {
+    const hasAlbum = await this.prisma.album.findFirst({
+      where: {
+        id: albumId,
+        users: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (hasAlbum) return true;
+    else return false;
   }
 
   async getAlbumsByArtist(artistId: string): Promise<Album[] | undefined> {
@@ -115,6 +127,7 @@ export class AlbumService {
             },
           },
         },
+        include: { artist: { select: { artistName: true } } },
         skip: offset,
         take: limit,
       });

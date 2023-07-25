@@ -4,7 +4,9 @@ import {
   Get,
   Param,
   Post,
+  Request,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 
@@ -13,6 +15,8 @@ import { CreateAlbumDTO } from "@lib/crud/album/dto/createAlbum.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Album } from "@prisma/client";
+import { AuthGuard } from "../auth/auth.guard";
+import { Public } from "utils/decorators/public";
 
 @Controller("albums")
 export class AlbumsController {
@@ -29,11 +33,17 @@ export class AlbumsController {
   }
 
   // 엘범 정보 가져오기 (트랙 정보 포함)
-  @Get("/:albumCode")
+  @Public()
+  @UseGuards(AuthGuard)
+  @Get("/:albumId")
   async getAlbumInfo(
-    @Param("albumCode") albumCode: string,
-  ): Promise<Album | undefined> {
-    return await this.albumsService.getAlbumInfo(albumCode);
+    @Request() req,
+    @Param("albumId") albumId: string,
+  ): Promise<{ album: Album; own: boolean } | undefined> {
+    return await this.albumsService.getAlbumInfo(
+      req.user?.sub ?? null,
+      albumId,
+    );
   }
 
   // 앨범 수정
