@@ -20,7 +20,9 @@ export class TracksService {
     const { artistName, albumName } = createTrackDTO;
     const folderName = "artist/" + artistName + "/" + albumName + "/tracks";
 
-    const s3Url = await this.uploadsService.uploadToS3(file, folderName);
+    const s3Url = file
+      ? await this.uploadsService.uploadToS3(file, folderName)
+      : "";
 
     createTrackDTO.trackURL = s3Url;
 

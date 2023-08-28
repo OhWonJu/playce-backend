@@ -41,4 +41,8 @@ export class AlbumsService {
       own: ownerShip,
     };
   }
+
+  async getAllAlbum(): Promise<Album[]> {
+    return await this.albumService.getAllAlbum();
+  }
 }

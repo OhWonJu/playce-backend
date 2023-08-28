@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Album, PlayList, Prisma } from "@prisma/client";
+import { Album, PlayList, Prisma, Queue } from "@prisma/client";
 
 import { UserService } from "@lib/crud/user/user.service";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
@@ -12,6 +12,8 @@ import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
 import { PlayListService } from "@lib/crud/play-list/play-list.service";
 import { GetPlayListsDTO } from "@lib/crud/play-list/dto/getPlayLists.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
+import { QueueService } from "@lib/crud/queue/queue.service";
+import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
 
 @Injectable()
 export class UsersService {
@@ -19,6 +21,7 @@ export class UsersService {
     private userService: UserService,
     private albumService: AlbumService,
     private playListService: PlayListService,
+    private queueService: QueueService,
   ) {}
 
   async createUser(createUserDTO: CreateUserDTO): Promise<MutationResponse> {
@@ -130,5 +133,16 @@ export class UsersService {
       myId,
       UpdatePlayListDTO,
     );
+  }
+
+  async getQueue(myId: string): Promise<Queue> {
+    return await this.queueService.getQueue(myId);
+  }
+
+  async updateQueue(
+    myId: string,
+    UpdateQueueDTO: UpdateQueueDTO,
+  ): Promise<MutationResponse> {
+    return await this.queueService.updateQueue(myId, UpdateQueueDTO);
   }
 }

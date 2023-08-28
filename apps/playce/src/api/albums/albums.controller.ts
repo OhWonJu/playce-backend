@@ -32,6 +32,11 @@ export class AlbumsController {
     return await this.albumsService.createAlbum(file, createAlbumDTO);
   }
 
+  @Get("/getAll")
+  async getAllAlbum(): Promise<Album[]> {
+    return await this.albumsService.getAllAlbum();
+  }
+
   // 엘범 정보 가져오기 (트랙 정보 포함)
   @Public()
   @UseGuards(AuthGuard)

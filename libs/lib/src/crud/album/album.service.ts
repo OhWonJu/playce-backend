@@ -138,6 +138,7 @@ export class AlbumService {
             some: { userName: userKey },
           },
         },
+        include: { artist: { select: { artistName: true } } },
         skip: offset,
         take: limit,
       });
@@ -170,5 +171,11 @@ export class AlbumService {
         error: "failed regist album: " + error,
       };
     }
+  }
+
+  async getAllAlbum(): Promise<Album[]> {
+    return await this.prisma.album.findMany({
+      include: { artist: { select: { artistName: true } } },
+    });
   }
 }

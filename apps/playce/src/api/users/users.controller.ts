@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -18,9 +19,10 @@ import { AuthGuard } from "../auth/auth.guard";
 import { getMeDTO } from "./dto/getMe.DTO";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
-import { Album, PlayList } from "@prisma/client";
+import { Album, PlayList, Queue } from "@prisma/client";
 import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
+import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
 
 @Controller("users")
 export class UsersController {
@@ -137,14 +139,31 @@ export class UsersController {
   async updatePlayList(
     @Request() req,
     @Param("playListId") playListId: string,
-    @Body() UpdatePlayListDTO: UpdatePlayListDTO,
+    @Body() updatePlayListDTO: UpdatePlayListDTO,
   ): Promise<MutationResponse> {
     return await this.usersService.updatePlayList(
       req.user.sub,
       playListId,
-      UpdatePlayListDTO,
+      updatePlayListDTO,
     );
   }
 
   // 플레이리스트 삭제
+
+  // 큐 가져오기
+  @UseGuards(AuthGuard)
+  @Get("/queue")
+  async getQueue(@Request() req): Promise<Queue> {
+    return await this.usersService.getQueue(req.user.sub);
+  }
+
+  // 큐 수정
+  @UseGuards(AuthGuard)
+  @Patch("update/queue")
+  async updateQueue(
+    @Request() req,
+    @Body() updateQueueDTO: UpdateQueueDTO,
+  ): Promise<MutationResponse> {
+    return await this.usersService.updateQueue(req.user.sub, updateQueueDTO);
+  }
 }
