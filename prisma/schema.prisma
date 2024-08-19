@@ -50,8 +50,8 @@ model Queue {
   queueThumbNail String[]
   songCount      Int      @default(0)
   totalPlayTime  Int      @default(0)
-  tracks Json[]
-  
+  tracks         Json[]
+
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique
 }
@@ -87,7 +87,7 @@ model Album {
 }
 
 model Track {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   artistName  String
   albumName   String
   albumArtURL String
@@ -95,6 +95,7 @@ model Track {
   trackNumber Int
   trackURL    String
   trackTime   Int
+  peaks       Float[]
 
   // relation
   Album   Album  @relation(fields: [albumId], references: [id])

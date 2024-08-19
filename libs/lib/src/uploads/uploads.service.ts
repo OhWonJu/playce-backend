@@ -18,9 +18,11 @@ export class UploadsService {
     this.S3 = new S3Client({ ...params });
   }
 
-  async uploadToS3(file: any, folderName: string) {
+  async uploadToS3(file: any, folderName: string, useDateKey?: boolean) {
     const bucket = this.configService.get<string>("AWS_BUCKET_NAME");
-    const key = `${folderName}/${Date.now()}_${file.originalname}`;
+    const key = useDateKey
+      ? `${folderName}/${Date.now()}_${file.originalname}`
+      : `${folderName}/${file.originalname}`;
 
     const command = new PutObjectCommand({
       Bucket: bucket,

@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString, IsArray } from "class-validator";
 
 export class CreateTrackDTO {
   @IsString()
@@ -20,8 +20,13 @@ export class CreateTrackDTO {
   @IsNumber()
   readonly trackNumber: number;
 
+  @IsOptional()
   @IsNumber()
-  readonly trackTime: number;
+  trackTime: number;
+
+  @IsOptional()
+  @IsNumber({}, { each: true })
+  peaks: number[];
 
   @IsString()
   readonly albumId: string;

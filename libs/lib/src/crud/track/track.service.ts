@@ -19,6 +19,7 @@ export class TrackService {
       trackTime,
       trackTitle,
       trackURL,
+      peaks,
     } = createTrackDTO;
 
     const newTrack = this.prisma.track.create({
@@ -31,6 +32,7 @@ export class TrackService {
         trackTitle,
         trackURL,
         albumId,
+        peaks,
       },
     });
 
