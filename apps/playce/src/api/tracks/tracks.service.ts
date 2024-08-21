@@ -146,7 +146,7 @@ export class TracksService {
     createTrackDTO.trackURL = s3Urls.find((url) => url.endsWith(".m3u8")) || "";
 
     const duration = await this.getDuration(inputFilePath);
-    createTrackDTO.trackTime = +duration.toFixed();
+    createTrackDTO.trackTime = Math.floor(duration);
 
     const waveform = await this.extractWaveform(inputFilePath);
     createTrackDTO.peaks = waveform;
