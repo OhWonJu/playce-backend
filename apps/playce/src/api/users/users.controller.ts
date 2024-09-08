@@ -8,8 +8,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   Request,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 
@@ -23,6 +25,10 @@ import { Album, PlayList, Queue } from "@prisma/client";
 import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
 import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
+import { UpdateUserDTO } from "@lib/crud/user/dto/updateUser.DTO";
+import { UNAUTHORIZED } from "utils/errorCodes";
+import { GetSummaryDTO } from "./dto/getSummary.DTO";
+import { getQueueDTO } from "./dto/getQueueDTO";
 
 @Controller("users")
 export class UsersController {
@@ -36,6 +42,19 @@ export class UsersController {
     return await this.usersService.createUser(createUserDTO);
   }
 
+  // 가인증 유저 최종 생성
+  @UseGuards(AuthGuard)
+  @Put("/create/confirm")
+  async confirmCreateUser(
+    @Request() req,
+    @Body() updateUserDTO: UpdateUserDTO,
+  ) {
+    return await this.usersService.confirmCreateUser(
+      req.user.sub,
+      updateUserDTO,
+    );
+  }
+
   // 첫 로드에 필요한 본인 정보
   @UseGuards(AuthGuard)
   @Get("/me")
@@ -43,14 +62,52 @@ export class UsersController {
     return await this.usersService.getMe(req.user.sub);
   }
 
-  // 프로파일
-  @Get("/profile/:userName")
-  async getProfile(
-    // @Request() req,
-    @Param("userName") userName: string,
-  ): Promise<getUserProfileDTO | undefined> {
-    return await this.usersService.getUserProfile({ userName });
+  @UseGuards(AuthGuard)
+  @Put("/logout")
+  async Logout(@Request() req, @Res() res): Promise<MutationResponse> {
+    const existUser = await this.usersService.getMe(req.user.sub);
+
+    if (!existUser) {
+      return {
+        ok: false,
+        error: UNAUTHORIZED.NOT_AUTHORIZED.message,
+        errorCode: UNAUTHORIZED.NOT_AUTHORIZED.code,
+      };
+    }
+
+    res.cookie("playce_access_token", "", {
+      httpOnly: true,
+      maxAge: 0,
+    });
+
+    res.cookie("playce_expires_at", "", {
+      maxAge: 0,
+    });
+
+    res.cookie("playce_refresh_token", "", {
+      httpOnly: true,
+      maxAge: 0,
+    });
+
+    const result = { ok: true };
+    res.send(result);
+    return result;
   }
+
+  @UseGuards(AuthGuard)
+  @Get("/summary")
+  async getSummary(@Request() req): Promise<GetSummaryDTO | undefined> {
+    return await this.usersService.getSummary(req.user.sub);
+  }
+
+  // // 프로파일
+  // @Get("/profile/:userName")
+  // async getProfile(
+  //   // @Request() req,
+  //   @Param("userName") userName: string,
+  // ): Promise<getUserProfileDTO | undefined> {
+  //   return await this.usersService.getUserProfile({ userName });
+  // }
 
   // 앨범 목록 가져오기
   @UseGuards(AuthGuard)
@@ -77,19 +134,19 @@ export class UsersController {
     );
   }
 
-  // 앨범 등록하기
-  @UseGuards(AuthGuard)
-  @Post("/regist/album")
-  async registAlbum(
-    @Request() req,
-    @Query("albumCode") albumCode: string,
-  ): Promise<MutationResponse> {
-    return await this.usersService.registAlbum(
-      req.user.sub,
-      req.user.username,
-      albumCode,
-    );
-  }
+  // // 앨범 등록하기
+  // @UseGuards(AuthGuard)
+  // @Post("/regist/album")
+  // async registAlbum(
+  //   @Request() req,
+  //   @Query("albumCode") albumCode: string,
+  // ): Promise<MutationResponse> {
+  //   return await this.usersService.registAlbum(
+  //     req.user.sub,
+  //     req.user.username,
+  //     albumCode,
+  //   );
+  // }
 
   // 유저 정보 수정
 
@@ -153,7 +210,7 @@ export class UsersController {
   // 큐 가져오기
   @UseGuards(AuthGuard)
   @Get("/queue")
-  async getQueue(@Request() req): Promise<Queue> {
+  async getQueue(@Request() req): Promise<getQueueDTO> {
     return await this.usersService.getQueue(req.user.sub);
   }
 

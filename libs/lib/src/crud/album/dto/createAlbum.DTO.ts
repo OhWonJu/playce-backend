@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsDate, IsOptional, IsString } from "class-validator";
 
 export class CreateAlbumDTO {
   @IsString()
@@ -23,4 +23,8 @@ export class CreateAlbumDTO {
 
   @IsString()
   readonly artistId: string;
+
+  @IsOptional()
+  @IsDate()
+  releasedAt: Date;
 }

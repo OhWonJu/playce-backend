@@ -12,24 +12,42 @@ datasource db {
 
 model User {
   id                String   @id @default(uuid())
-  firstName         String?
-  lastName          String?
-  userName          String   @unique
-  email             String   @unique
+  name              String?
+  nickName          String?
+  email             String?  @unique
+  hashedPassword    String?
   phoneNumber       String?  @unique
-  password          String
-  snsKey            String?  @unique
+  image             String?
   bio               String?
-  profilePhoto      String?
   currentTrackId    String?
   currentPlayTime   Float    @default(0)
   currentPlayListId String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  accounts  Account[] // Social Accounts
   albums    Album[]
   playLists PlayList[]
   Queue     Queue?
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model PlayList {
@@ -46,10 +64,10 @@ model PlayList {
 }
 
 model Queue {
-  id             String   @id @default(uuid())
-  queueThumbNail String[]
-  songCount      Int      @default(0)
-  totalPlayTime  Int      @default(0)
+  id             String @id @default(uuid())
+  queueThumbNail Json?
+  songCount      Int    @default(0)
+  totalPlayTime  Int    @default(0)
   tracks         Json[]
 
   user   User   @relation(fields: [userId], references: [id])
@@ -70,14 +88,15 @@ model Artist {
 }
 
 model Album {
-  id          String   @id @default(uuid())
-  albumCode   String   @unique
+  id          String    @id @default(uuid())
+  albumCode   String    @unique
   albumName   String
   albumArtURL String
   albumType   String
   albumInfo   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  releasedAt  DateTime?
 
   artist   Artist  @relation(fields: [artistId], references: [id])
   artistId String

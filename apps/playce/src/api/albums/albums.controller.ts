@@ -17,6 +17,8 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { Album } from "@prisma/client";
 import { AuthGuard } from "../auth/auth.guard";
 import { Public } from "utils/decorators/public";
+import { ResizeImagePipe } from "utils/pipes/resize-image.pipe";
+import { ResizedFile } from "utils/commonTypes";
 
 @Controller("albums")
 export class AlbumsController {
@@ -26,10 +28,11 @@ export class AlbumsController {
   @Post("/create")
   @UseInterceptors(FileInterceptor("file"))
   async createUser(
-    @UploadedFile() file,
+    @UploadedFile(new ResizeImagePipe())
+    files: ResizedFile,
     @Body() createAlbumDTO: CreateAlbumDTO,
   ): Promise<MutationResponse> {
-    return await this.albumsService.createAlbum(file, createAlbumDTO);
+    return await this.albumsService.createAlbum(files, createAlbumDTO);
   }
 
   @Get("/getAll")

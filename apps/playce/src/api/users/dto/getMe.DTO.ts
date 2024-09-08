@@ -3,6 +3,6 @@ export class getMeDTO {
   currentPlayListId: string;
   currentPlayTime: number;
   currentTrackId: string;
-  userName: string;
-  profilePhoto: string;
+  nickName: string;
+  image: string;
 }

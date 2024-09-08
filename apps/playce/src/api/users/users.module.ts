@@ -7,9 +7,16 @@ import { UsersService } from "./users.service";
 import { UsersController } from "./users.controller";
 import { PlayListModule } from "@lib/crud/play-list/play-list.module";
 import { QueueModule } from "@lib/crud/queue/queue.module";
+import { DatabaseModule } from "@lib";
 
 @Module({
-  imports: [UserModule, AlbumModule, PlayListModule, QueueModule],
+  imports: [
+    UserModule,
+    AlbumModule,
+    PlayListModule,
+    QueueModule,
+    DatabaseModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

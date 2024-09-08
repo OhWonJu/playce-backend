@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Album, PlayList, Prisma, Queue } from "@prisma/client";
+import * as _ from "lodash";
 
 import { UserService } from "@lib/crud/user/user.service";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
@@ -14,10 +15,16 @@ import { GetPlayListsDTO } from "@lib/crud/play-list/dto/getPlayLists.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
 import { QueueService } from "@lib/crud/queue/queue.service";
 import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
+import { UpdateUserDTO } from "@lib/crud/user/dto/updateUser.DTO";
+import { GetSummaryDTO } from "./dto/getSummary.DTO";
+import { DatabaseService } from "@lib/database/database.service";
+import { AnyARecord } from "dns";
+import { getQueueDTO } from "./dto/getQueueDTO";
 
 @Injectable()
 export class UsersService {
   constructor(
+    private prisma: DatabaseService,
     private userService: UserService,
     private albumService: AlbumService,
     private playListService: PlayListService,
@@ -28,18 +35,59 @@ export class UsersService {
     return await this.userService.createUser(createUserDTO);
   }
 
+  async confirmCreateUser(
+    userId: string,
+    updateUserDTO: UpdateUserDTO,
+  ): Promise<MutationResponse> {
+    return await this.userService.updateUser({ id: userId }, updateUserDTO);
+  }
+
   async getMe(userId: string) {
     return await this.userService.getMe({ id: userId });
   }
 
-  async getUserProfile(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<getUserProfileDTO | undefined> {
-    const profile = await this.userService.findUserWithOutPrivate(
-      userWhereUniqueInput,
-    );
+  // async getUserProfile(
+  //   userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  // ): Promise<getUserProfileDTO | undefined> {
+  //   const profile = await this.userService.findUserWithOutPrivate(
+  //     userWhereUniqueInput,
+  //   );
 
-    return profile;
+  //   return profile;
+  // }
+
+  async getSummary(userId: string): Promise<GetSummaryDTO> {
+    const userAlbums = await this.prisma.album.findMany({
+      where: { users: { some: { id: userId } } },
+      select: {
+        id: true,
+        albumName: true,
+        albumArtURL: true,
+        artist: {
+          select: {
+            artistName: true,
+          },
+        },
+      },
+      take: 20,
+    });
+
+    const userPlayList = await this.prisma.playList.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        playListName: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    const result: GetSummaryDTO = {
+      myAlbums: userAlbums,
+      myPlayList: userPlayList,
+    };
+
+    return result;
   }
 
   async getUserAlbums(
@@ -72,17 +120,17 @@ export class UsersService {
     };
   }
 
-  async registAlbum(
-    userId: string,
-    userName: string,
-    albumCode: string,
-  ): Promise<MutationResponse> {
-    const checkMe = (await this.getMe(userId)).userName === userName;
+  // async registAlbum(
+  //   userId: string,
+  //   userName: string,
+  //   albumCode: string,
+  // ): Promise<MutationResponse> {
+  //   const checkMe = (await this.getMe(userId)).userName === userName;
 
-    if (checkMe) {
-      return await this.albumService.registUser(userId, albumCode);
-    }
-  }
+  //   if (checkMe) {
+  //     return await this.albumService.registUser(userId, albumCode);
+  //   }
+  // }
 
   async createPlayList(
     userId: string,
@@ -135,8 +183,19 @@ export class UsersService {
     );
   }
 
-  async getQueue(myId: string): Promise<Queue> {
-    return await this.queueService.getQueue(myId);
+  async getQueue(myId: string): Promise<getQueueDTO> {
+    const queue = await this.queueService.getQueue(myId);
+    const queueThumbNailArray = _.chain(new Object(queue.queueThumbNail))
+      .keys()
+      .take(4)
+      .value();
+
+    queue.queueThumbNail = queueThumbNailArray;
+
+    return {
+      ...queue,
+      queueThumbNail: queueThumbNailArray,
+    };
   }
 
   async updateQueue(

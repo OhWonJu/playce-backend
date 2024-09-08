@@ -7,20 +7,21 @@ import { MutationResponse } from "utils/decorators/types/mutationResopnse";
 import { getMeDTO } from "apps/playce/src/api/users/dto/getMe.DTO";
 import { getUserProfileDTO } from "apps/playce/src/api/users/dto/getUserProfile.DTO";
 import { CreateUserDTO } from "./dto/createUser.DTO";
+import { UpdateUserDTO } from "./dto/updateUser.DTO";
+import { INTERNAL_ERROR } from "utils/errorCodes";
 
 @Injectable()
 export class UserService {
   constructor(private prisma: DatabaseService) {}
 
-  private async saveUser(createUserDTO: CreateUserDTO) {
-    const { email, firstName, lastName, password, phoneNumber, userName } =
-      createUserDTO;
-
+  private async saveUser(createUserDTO: CreateUserDTO): Promise<any | null> {
     const newUser = this.prisma.user.create({
-      data: { email, firstName, lastName, password, phoneNumber, userName },
+      data: createUserDTO,
     });
 
-    await this.prisma.$transaction([newUser]);
+    const result = await this.prisma.$transaction([newUser]);
+
+    return result[0];
   }
 
   async uniqueKeyCheck(
@@ -33,12 +34,12 @@ export class UserService {
       email: await this.prisma.user.findUnique({
         where: { email: data },
       }),
-      userName: await this.prisma.user.findUnique({
-        where: { userName: data },
-      }),
-      phoneNumber: await this.prisma.user.findUnique({
-        where: { phoneNumber: data },
-      }),
+      // userName: await this.prisma.user.findUnique({
+      //   where: { userName: data },
+      // }),
+      // phoneNumber: await this.prisma.user.findUnique({
+      //   where: { phoneNumber: data },
+      // }),
     };
 
     const existCheck = checking[type];
@@ -47,19 +48,57 @@ export class UserService {
   }
 
   async createUser(createUserDTO: CreateUserDTO): Promise<MutationResponse> {
-    const { email, userName } = createUserDTO;
+    const { email } = createUserDTO;
 
-    const [emailCheck, userNameCheck] = await Promise.all([
+    const [emailCheck] = await Promise.all([
       this.uniqueKeyCheck(email, "email"),
-      this.uniqueKeyCheck(userName, "userName"),
     ]);
 
-    if (emailCheck && userNameCheck) {
-      await this.saveUser(createUserDTO);
+    console.log(emailCheck);
+
+    if (emailCheck) {
+      const newUser = await this.saveUser(createUserDTO);
+
+      return {
+        ok: true,
+        data: newUser,
+      };
+    } else return { ok: false, error: "create new user faild" };
+  }
+
+  async createTempUser(
+    createUserDTO: CreateUserDTO,
+  ): Promise<MutationResponse> {
+    const newUser = await this.saveUser(createUserDTO);
+
+    if (newUser) {
+      return {
+        ok: true,
+        data: newUser,
+      };
+    } else return { ok: false, error: "create new user faild" };
+  }
+
+  async updateUser(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+    updateUserDTO: UpdateUserDTO,
+  ): Promise<MutationResponse> {
+    const updatedUser = await this.prisma.user.update({
+      where: userWhereUniqueInput,
+      data: { ...updateUserDTO },
+    });
+
+    if (updatedUser) {
       return {
         ok: true,
       };
-    } else return { ok: false, error: "unique key exist" };
+    } else {
+      return {
+        ok: false,
+        error: INTERNAL_ERROR.message,
+        errorCode: INTERNAL_ERROR.code,
+      };
+    }
   }
 
   async getMe(
@@ -69,11 +108,11 @@ export class UserService {
       where: userWhereUniqueInput,
       select: {
         id: true,
+        nickName: true,
         currentPlayListId: true,
         currentPlayTime: true,
         currentTrackId: true,
-        userName: true,
-        profilePhoto: true,
+        image: true,
       },
       // include: { albums: true, playLists: true },
     });
@@ -87,20 +126,28 @@ export class UserService {
     });
   }
 
-  async findUserWithOutPrivate(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<getUserProfileDTO | null> {
+  async findUserByEmail(email: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
-      where: userWhereUniqueInput,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        userName: true,
-        bio: true,
-        profilePhoto: true,
-        createdAt: true,
+      where: {
+        email,
       },
     });
   }
+
+  // async findUserWithOutPrivate(
+  //   userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  // ): Promise<getUserProfileDTO | null> {
+  //   return await this.prisma.user.findUnique({
+  //     where: userWhereUniqueInput,
+  //     select: {
+  //       id: true,
+  //       firstName: true,
+  //       lastName: true,
+  //       userName: true,
+  //       bio: true,
+  //       profilePhoto: true,
+  //       createdAt: true,
+  //     },
+  //   });
+  // }
 }

@@ -5,6 +5,7 @@ import { AlbumService } from "@lib/crud/album/album.service";
 import { CreateAlbumDTO } from "@lib/crud/album/dto/createAlbum.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
 import { UploadsService } from "@lib/uploads/uploads.service";
+import { ResizedFile } from "utils/commonTypes";
 
 @Injectable()
 export class AlbumsService {
@@ -14,13 +15,19 @@ export class AlbumsService {
   ) {}
 
   async createAlbum(
-    file: any,
+    files: ResizedFile,
     createAlbumDTO: CreateAlbumDTO,
   ): Promise<MutationResponse> {
     const { artistName, albumName } = createAlbumDTO;
     const folderName = "artist/" + artistName + "/" + albumName;
 
-    const s3Url = await this.uploadsService.uploadToS3(file, folderName);
+    let s3Url = "";
+
+    for (const [_, value] of Object.entries(files)) {
+      s3Url = await this.uploadsService.uploadToS3(value, folderName);
+    }
+
+    s3Url = s3Url.split("_").slice(0, -1).join("_");
 
     createAlbumDTO.albumArtURL = s3Url;
 

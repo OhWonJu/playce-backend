@@ -116,33 +116,35 @@ export class AlbumService {
     type: "id" | "userName",
     option: GetAlbumsDTO,
   ): Promise<Album[] | undefined> {
-    const { offset, limit } = option;
+    // const { offset, limit } = option;
 
-    if (type === "id") {
-      return await this.prisma.album.findMany({
-        where: {
-          users: {
-            some: {
-              id: userKey,
-            },
-          },
-        },
-        include: { artist: { select: { artistName: true } } },
-        skip: offset,
-        take: limit,
-      });
-    } else if (type === "userName") {
-      return await this.prisma.album.findMany({
-        where: {
-          users: {
-            some: { userName: userKey },
-          },
-        },
-        include: { artist: { select: { artistName: true } } },
-        skip: offset,
-        take: limit,
-      });
-    }
+    // if (type === "id") {
+    //   return await this.prisma.album.findMany({
+    //     where: {
+    //       users: {
+    //         some: {
+    //           id: userKey,
+    //         },
+    //       },
+    //     },
+    //     include: { artist: { select: { artistName: true } } },
+    //     skip: offset,
+    //     take: limit,
+    //   });
+    // } else if (type === "userName") {
+    //   return await this.prisma.album.findMany({
+    //     where: {
+    //       users: {
+    //         some: { userName: userKey },
+    //       },
+    //     },
+    //     include: { artist: { select: { artistName: true } } },
+    //     skip: offset,
+    //     take: limit,
+    //   });
+    // }
+
+    return null;
   }
 
   async registUser(

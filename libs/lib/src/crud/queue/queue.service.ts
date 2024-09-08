@@ -28,14 +28,16 @@ export class QueueService {
 
   async createQueue(CreateQueueDTO: CreateQueueDTO): Promise<MutationResponse> {
     try {
-      await this.saveQueue(CreateQueueDTO);
+      const newQueue = await this.saveQueue(CreateQueueDTO);
       return {
         ok: true,
+        data: newQueue,
       };
     } catch (error) {
       return {
         ok: false,
         error: "faild make queue: " + error,
+        data: null,
       };
     }
   }
@@ -60,21 +62,22 @@ export class QueueService {
   ): Promise<MutationResponse> {
     const { isAdd, trackId } = UpdateQueueDTO;
 
-    const existQueue = await this.prisma.queue.findFirst({
+    let queue = await this.prisma.queue.findFirst({
       where: { userId },
     });
 
-    if (!existQueue) {
-      await this.createQueue({ userId });
+    if (!queue) {
+      const result = await this.createQueue({ userId });
+      queue = result.data;
     }
 
     // const oldTrackLists = existPlayList.tracks.map((track) => ({
     //   id: track.id,
     // }));
-    const upatedTrackList = existQueue.tracks;
-    let songCount = existQueue.songCount;
-    let totalPlayTime = existQueue.totalPlayTime;
-    let queueThumb = existQueue.queueThumbNail;
+    const upatedTrackList = queue.tracks;
+    let songCount = queue.songCount;
+    let totalPlayTime = queue.totalPlayTime;
+    const queueThumb = queue.queueThumbNail ?? {};
 
     const newTrack = await this.trackService.getTrack(trackId);
 
@@ -90,8 +93,11 @@ export class QueueService {
         songCount += 1;
         totalPlayTime += newTrack.trackTime;
       }
-      if (songCount === 1) {
-        queueThumb.push(newTrack.albumArtURL);
+
+      if (queueThumb[newTrack.albumArtURL]) {
+        queueThumb[newTrack.albumArtURL] += 1;
+      } else {
+        queueThumb[newTrack.albumArtURL] = 1;
       }
     } else {
       // DELETE TRACK
@@ -101,13 +107,15 @@ export class QueueService {
         songCount -= 1;
         totalPlayTime -= newTrack.trackTime;
       }
-      if (songCount === 0) {
-        queueThumb = [];
+      if (queueThumb[newTrack.albumArtURL]) {
+        queueThumb[newTrack.albumArtURL] === 1
+          ? delete queueThumb[newTrack.albumArtURL]
+          : (queueThumb[newTrack.albumArtURL] -= 1);
       }
     }
 
     const updatedQueue = this.prisma.queue.update({
-      where: { id: existQueue.id },
+      where: { id: queue.id },
       data: {
         queueThumbNail: queueThumb,
         songCount,

@@ -1,10 +1,11 @@
 import { IsOptional, IsString } from "class-validator";
 
-export class CreateUserDTO {
+export class UpdateUserDTO {
   @IsOptional()
   @IsString()
   readonly name: string;
 
+  @IsOptional()
   @IsString()
   readonly nickName: string;
 

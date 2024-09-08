@@ -6,7 +6,7 @@ export class PlayceController {
   constructor(private readonly playceService: PlayceService) {}
 
   @Get()
-  getHello(): string {
-    return this.playceService.getHello();
+  connectCheck(): { ok: boolean } {
+    return this.playceService.connectCheck();
   }
 }
