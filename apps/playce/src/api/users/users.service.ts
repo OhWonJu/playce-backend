@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Album, PlayList, Prisma, Queue } from "@prisma/client";
+import { Album, PlayList, Prisma, Queue, Track } from "@prisma/client";
 import * as _ from "lodash";
 
 import { UserService } from "@lib/crud/user/user.service";
@@ -18,8 +18,8 @@ import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
 import { UpdateUserDTO } from "@lib/crud/user/dto/updateUser.DTO";
 import { GetSummaryDTO } from "./dto/getSummary.DTO";
 import { DatabaseService } from "@lib/database/database.service";
-import { AnyARecord } from "dns";
 import { getQueueDTO } from "./dto/getQueueDTO";
+import { GetPlaylistsResponse } from "./dto/getPlaylistsResponse";
 
 @Injectable()
 export class UsersService {
@@ -77,6 +77,7 @@ export class UsersService {
       select: {
         id: true,
         playListName: true,
+        thumbNail: true,
       },
       orderBy: { createdAt: "desc" },
       take: 20,
@@ -134,39 +135,48 @@ export class UsersService {
 
   async createPlayList(
     userId: string,
-    CreatePlayListDTO: CreatePlayListDTO,
+    createPlayListDTO: CreatePlayListDTO,
   ): Promise<MutationResponse> {
-    CreatePlayListDTO.userId = userId;
-    // console.log(CreatePlayListDTO);
+    createPlayListDTO.userId = userId;
 
-    return await this.playListService.createPlayList(CreatePlayListDTO);
+    return await this.playListService.createPlayList(createPlayListDTO);
   }
 
   async getAllPlayList(
     myId: string,
     userId: string,
     option: GetPlayListsDTO,
-  ): Promise<{ playlists: PlayList[]; own: boolean }> {
-    const own = myId === userId;
+  ): Promise<GetPlaylistsResponse> {
+    // const own = myId === userId;
 
-    const playlists = await this.playListService.getAllPlayList(userId, option);
-
-    return {
-      playlists: playlists,
-      own,
-    };
+    return await this.playListService.getAllPlayList(userId, option);
   }
 
   async getPlayList(
     myId: string,
     playListId: string,
-  ): Promise<{ playList: PlayList; own: boolean }> {
-    const playList = await this.playListService.getPlayList(playListId);
+  ): Promise<{ playlist: PlayList; own: boolean }> {
+    const playlist = await this.playListService.getPlayList(playListId);
 
-    const own = playList.userId === myId;
+    const own = playlist.userId === myId;
 
     return {
-      playList,
+      playlist,
+      own,
+    };
+  }
+
+  async getPlayListTracks(
+    myId: string,
+    playlistId: string,
+  ): Promise<{ playlistId: string; tracks: Track[]; own: boolean }> {
+    const playlist = await this.playListService.getTracksByPlaylist(playlistId);
+
+    const own = playlist.userId === myId;
+
+    return {
+      playlistId: playlist.id,
+      tracks: playlist.tracks,
       own,
     };
   }

@@ -10,5 +10,6 @@ export class GetSummaryDTO {
   myPlayList: {
     id: string;
     playListName: string;
+    thumbNail: string[];
   }[];
 }

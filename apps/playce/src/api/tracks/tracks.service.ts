@@ -124,7 +124,11 @@ export class TracksService {
 
     const fileName: string = file.originalname.split(".")[0];
 
-    const folderName = `artist/${artistName}/${albumName}/tracks/${fileName}`;
+    const folderName =
+      `artist/${artistName}/${albumName}/tracks/${fileName}`.replaceAll(
+        " ",
+        "_",
+      );
 
     await this.uploadsService.uploadToS3(file, folderName, false);
 

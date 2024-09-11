@@ -27,7 +27,7 @@ export class AlbumsController {
   // 앨범 생성
   @Post("/create")
   @UseInterceptors(FileInterceptor("file"))
-  async createUser(
+  async createAlbum(
     @UploadedFile(new ResizeImagePipe())
     files: ResizedFile,
     @Body() createAlbumDTO: CreateAlbumDTO,

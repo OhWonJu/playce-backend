@@ -4299,6 +4299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"class-transformer@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "class-transformer@npm:0.5.1"
+  checksum: 10c0/19809914e51c6db42c036166839906420bb60367df14e15f49c45c8c1231bf25ae661ebe94736ee29cc688b77101ef851a8acca299375cc52fc141b64acde18a
+  languageName: node
+  linkType: hard
+
 "class-validator@npm:^0.14.0":
   version: 0.14.0
   resolution: "class-validator@npm:0.14.0"
@@ -7865,6 +7872,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^5.59.11"
     "@typescript-eslint/parser": "npm:^5.59.11"
     aws-sdk: "npm:^2.1418.0"
+    class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.0"
     cookie-parser: "npm:^1.4.6"
     eslint: "npm:^8.42.0"

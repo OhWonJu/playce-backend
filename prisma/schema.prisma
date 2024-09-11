@@ -54,7 +54,9 @@ model PlayList {
   id           String   @id @default(uuid())
   isPublic     Boolean  @default(false)
   playListName String
-  thumbNail    String?
+  thumbNail    String[]
+  thumbNailMap Json?
+  count        Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

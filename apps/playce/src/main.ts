@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
 
 import { DatabaseService } from "@lib/database/database.service";
@@ -15,6 +16,12 @@ async function bootstrap() {
 
   const prismaService = app.get(DatabaseService);
   await prismaService.enableShutdownHooks(app);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
 
   app.use(cookieParser());
 

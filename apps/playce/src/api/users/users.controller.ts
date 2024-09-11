@@ -21,7 +21,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { getMeDTO } from "./dto/getMe.DTO";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
-import { Album, PlayList, Queue } from "@prisma/client";
+import { Album, PlayList, Queue, Track } from "@prisma/client";
 import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
 import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
@@ -29,6 +29,7 @@ import { UpdateUserDTO } from "@lib/crud/user/dto/updateUser.DTO";
 import { UNAUTHORIZED } from "utils/errorCodes";
 import { GetSummaryDTO } from "./dto/getSummary.DTO";
 import { getQueueDTO } from "./dto/getQueueDTO";
+import { GetPlaylistsResponse } from "./dto/getPlaylistsResponse";
 
 @Controller("users")
 export class UsersController {
@@ -167,17 +168,24 @@ export class UsersController {
 
   // 플레이리스트 목록 가져오기
   @UseGuards(AuthGuard)
-  @Get("/playlist/user/:userId")
+  @Get("/playlist/:userId")
   async getAllPlayList(
     @Request() req,
     @Param("userId") userId: string,
-    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number,
-    @Query("limit", new DefaultValuePipe(100), ParseIntPipe) limit: number,
-  ): Promise<{ playlists: PlayList[]; own: boolean }> {
+    @Query("cursor") cursor: string,
+  ): Promise<GetPlaylistsResponse> {
     return await this.usersService.getAllPlayList(req.user.sub, userId, {
-      offset,
-      limit,
+      cursor,
     });
+  }
+
+  @UseGuards(AuthGuard)
+  @Put("/playlist/tracks/:playListId")
+  async getPlayListTracks(
+    @Request() req,
+    @Param("playListId") playListId: string,
+  ): Promise<{ playlistId: string; own: boolean }> {
+    return await this.usersService.getPlayListTracks(req.user.sub, playListId);
   }
 
   // 플레이리스트 가져오기
@@ -186,7 +194,7 @@ export class UsersController {
   async getPlayList(
     @Request() req,
     @Param("playListId") playListId: string,
-  ): Promise<{ playList: PlayList; own: boolean }> {
+  ): Promise<{ playlist: PlayList; own: boolean }> {
     return await this.usersService.getPlayList(req.user.sub, playListId);
   }
 

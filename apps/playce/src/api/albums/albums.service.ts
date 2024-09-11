@@ -19,7 +19,10 @@ export class AlbumsService {
     createAlbumDTO: CreateAlbumDTO,
   ): Promise<MutationResponse> {
     const { artistName, albumName } = createAlbumDTO;
-    const folderName = "artist/" + artistName + "/" + albumName;
+    const folderName = ("artist/" + artistName + "/" + albumName).replaceAll(
+      " ",
+      "_",
+    );
 
     let s3Url = "";
 

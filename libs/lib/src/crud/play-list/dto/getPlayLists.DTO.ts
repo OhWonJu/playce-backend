@@ -1,4 +1,3 @@
 export class GetPlayListsDTO {
-  offset: number;
-  limit: number;
+  cursor?: string;
 }

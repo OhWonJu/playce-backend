@@ -1,8 +1,12 @@
+import { Expose, Transform } from "class-transformer";
 import { IsArray, IsOptional, IsString } from "class-validator";
 
 export class UpdatePlayListDTO {
+  @Expose()
+  @Transform((value) => {
+    return value.value == "true" ? true : false;
+  })
   @IsOptional()
-  @IsString()
   readonly isPublic: boolean;
 
   @IsOptional()
@@ -12,6 +16,17 @@ export class UpdatePlayListDTO {
   @IsOptional()
   @IsString()
   readonly thumbNail: string;
+
+  @Expose()
+  @Transform((value) => {
+    return value.value == "true" ? true : false;
+  })
+  @IsOptional()
+  readonly isAdd: boolean;
+
+  @IsOptional()
+  @IsString()
+  readonly trackId: string;
 
   @IsOptional()
   @IsArray()
