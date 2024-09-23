@@ -1,4 +1,3 @@
 export class GetAlbumsDTO {
-  offset: number;
-  limit: number;
+  cursor?: string;
 }

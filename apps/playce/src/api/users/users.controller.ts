@@ -2,10 +2,8 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -30,6 +28,11 @@ import { UNAUTHORIZED } from "utils/errorCodes";
 import { GetSummaryDTO } from "./dto/getSummary.DTO";
 import { getQueueDTO } from "./dto/getQueueDTO";
 import { GetPlaylistsResponse } from "./dto/getPlaylistsResponse";
+import {
+  GetAlbumsResponse,
+  GetUserAlbumsResponse,
+} from "./dto/getAlbumsResponse";
+import { CreateUserAlbumDTO } from "@lib/crud/user/dto/createUserAlbum.DTO";
 
 @Controller("users")
 export class UsersController {
@@ -110,44 +113,31 @@ export class UsersController {
   //   return await this.usersService.getUserProfile({ userName });
   // }
 
-  // 앨범 목록 가져오기
+  // 나의 앨범 목록 가져오기
   @UseGuards(AuthGuard)
-  @Get("/:userKey/:type/albums")
+  @Get("/:userId/albums")
   async getUserAlbums(
     @Request() req,
-    @Param("userKey") userKey: string,
-    @Param("type") type: string,
-    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number,
-    @Query("limit", new DefaultValuePipe(100), ParseIntPipe) limit: number,
-  ): Promise<{ albums: Album[]; own: boolean } | undefined> {
-    // front에서 앨범 상세뷰가 그려질때 상위 컴포넌트로부터 own값이 전달되면 그대로 처리
-    // 그렇지 않다면 앨범 상세뷰 내에서 해당 앨범에 대한 소유 정보를 확인해서 처리 own => boolean or undefind?? when undefind 일때 own 확인..
-    const realType = type === "a" ? "id" : type === "b" ? "userName" : "none";
-    return await this.usersService.getUserAlbums(
-      req.user.sub,
-      req.user.username,
-      userKey,
-      realType,
-      {
-        offset,
-        limit,
-      },
-    );
+    @Param("userId") userId: string,
+    @Query("cursor") cursor: string,
+  ): Promise<GetUserAlbumsResponse> {
+    return await this.usersService.getUserAlbums(req.user.sub, userId, {
+      cursor,
+    });
   }
 
-  // // 앨범 등록하기
-  // @UseGuards(AuthGuard)
-  // @Post("/regist/album")
-  // async registAlbum(
-  //   @Request() req,
-  //   @Query("albumCode") albumCode: string,
-  // ): Promise<MutationResponse> {
-  //   return await this.usersService.registAlbum(
-  //     req.user.sub,
-  //     req.user.username,
-  //     albumCode,
-  //   );
-  // }
+  // User Album 생성
+  @UseGuards(AuthGuard)
+  @Post("/create/userAlbum")
+  async createUserAlbum(
+    @Request() req,
+    @Body() createUserAlbumDTO: CreateUserAlbumDTO,
+  ): Promise<MutationResponse> {
+    return await this.usersService.createUserAlbum(
+      req.user.sub,
+      createUserAlbumDTO,
+    );
+  }
 
   // 유저 정보 수정
 

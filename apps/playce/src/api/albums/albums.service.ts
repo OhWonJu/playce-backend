@@ -6,11 +6,13 @@ import { CreateAlbumDTO } from "@lib/crud/album/dto/createAlbum.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
 import { UploadsService } from "@lib/uploads/uploads.service";
 import { ResizedFile } from "utils/commonTypes";
+import { UserAlbumService } from "@lib/crud/user/userAlbum.service";
 
 @Injectable()
 export class AlbumsService {
   constructor(
     private albumService: AlbumService,
+    private userAlbumService: UserAlbumService,
     private uploadsService: UploadsService,
   ) {}
 
@@ -43,7 +45,7 @@ export class AlbumsService {
   ): Promise<{ album: Album; own: boolean } | undefined> {
     const album = await this.albumService.getAlbum({ id: albumId });
     const ownerShip = userId
-      ? await this.albumService.getAlbumOwnership(userId, album.id)
+      ? await this.userAlbumService.getAlbumOwnership(userId, album.id)
       : false;
 
     return {

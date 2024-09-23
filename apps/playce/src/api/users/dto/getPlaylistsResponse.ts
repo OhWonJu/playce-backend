@@ -1,5 +1,3 @@
-import { Track } from "@prisma/client";
-
 export interface GetPlaylistsResponse {
   playlists: {
     id: string;

@@ -20,16 +20,22 @@ import { GetSummaryDTO } from "./dto/getSummary.DTO";
 import { DatabaseService } from "@lib/database/database.service";
 import { getQueueDTO } from "./dto/getQueueDTO";
 import { GetPlaylistsResponse } from "./dto/getPlaylistsResponse";
+import { GetUserAlbumsResponse } from "./dto/getAlbumsResponse";
+import { UserAlbumService } from "@lib/crud/user/userAlbum.service";
+import { CreateUserAlbumDTO } from "@lib/crud/user/dto/createUserAlbum.DTO";
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: DatabaseService,
     private userService: UserService,
+    private userAlbumService: UserAlbumService,
     private albumService: AlbumService,
     private playListService: PlayListService,
     private queueService: QueueService,
   ) {}
+
+  private albumsBatch = 15;
 
   async createUser(createUserDTO: CreateUserDTO): Promise<MutationResponse> {
     return await this.userService.createUser(createUserDTO);
@@ -57,8 +63,21 @@ export class UsersService {
   // }
 
   async getSummary(userId: string): Promise<GetSummaryDTO> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        userAlbumIds: true,
+      },
+    });
+
+    // 배열의 앞 20개만 가져오기
+    const userAlbumIds = user?.userAlbumIds.slice(0, 20);
+
     const userAlbums = await this.prisma.album.findMany({
-      where: { users: { some: { id: userId } } },
+      where: {
+        id: { in: userAlbumIds },
+      },
       select: {
         id: true,
         albumName: true,
@@ -69,8 +88,22 @@ export class UsersService {
           },
         },
       },
-      take: 20,
     });
+
+    // const userAlbums = await this.prisma.album.findMany({
+    //   where: { users: { some: { id: userId } } },
+    //   select: {
+    //     id: true,
+    //     albumName: true,
+    //     albumArtURL: true,
+    //     artist: {
+    //       select: {
+    //         artistName: true,
+    //       },
+    //     },
+    //   },
+    //   take: 20,
+    // });
 
     const userPlayList = await this.prisma.playList.findMany({
       where: { userId },
@@ -93,32 +126,86 @@ export class UsersService {
 
   async getUserAlbums(
     myId: string,
-    myName: string,
-    userKey: string,
-    type: "id" | "userName" | "none",
+    userId: string,
     option: GetAlbumsDTO,
-  ): Promise<{ albums: Album[]; own: boolean } | undefined> {
-    if (type === "none") return;
+  ): Promise<GetUserAlbumsResponse> {
+    //  const own = myId === userId;
 
-    const checkMe =
-      type === "id"
-        ? myId === userKey
-        : type === "userName"
-        ? myName === userKey
-        : false;
+    const { cursor } = option;
 
-    const own = checkMe;
+    const userAlbums = await this.prisma.userAlbum.findMany({
+      where: {
+        userId: userId,
+      },
+      take: this.albumsBatch,
+      ...(cursor && {
+        skip: 1,
+        cursor: {
+          id: cursor,
+        },
+      }),
+    });
+    const albums = await Promise.all(
+      userAlbums.map(async (userAlbum) => {
+        const albumData = await this.prisma.album.findUnique({
+          where: { id: userAlbum.albumId },
+          include: {
+            artist: {
+              select: {
+                artistName: true,
+              },
+            },
+          },
+        });
 
-    const albums = await this.albumService.getAlbumsByUser(
-      userKey,
-      type,
-      option,
+        return {
+          id: albumData?.id,
+          userAlbumId: userAlbum.id,
+          albumCode: userAlbum.albumCode,
+          albumName: albumData?.albumName,
+          albumArtURL: albumData?.albumArtURL,
+          albumType: albumData?.albumType,
+          albumInfo: albumData?.albumInfo,
+          artist: {
+            artistName: albumData?.artist.artistName,
+          },
+          createdAt: userAlbum.createdAt,
+          updatedAt: userAlbum.updatedAt,
+        };
+      }),
     );
+
+    // const albums = await this.prisma.album.findMany({
+    //   where: { id: { in: albumIds } },
+    //   include: {
+    //     artist: {
+    //       select: {
+    //         artistName: true,
+    //       },
+    //     },
+    //   },
+    // });
+
+    let nextCursor = null;
+
+    if (userAlbums.length === this.albumsBatch) {
+      nextCursor = userAlbums[this.albumsBatch - 1].id;
+    }
 
     return {
       albums,
-      own,
+      nextCursor,
     };
+
+    // return await this.albumService.getAlbumsByUser(userId, option);
+  }
+
+  async createUserAlbum(
+    userId: string,
+    createUserAlbumDTO: CreateUserAlbumDTO,
+  ): Promise<MutationResponse> {
+    createUserAlbumDTO.userId = userId;
+    return await this.userAlbumService.createUserAlbum(createUserAlbumDTO);
   }
 
   // async registAlbum(

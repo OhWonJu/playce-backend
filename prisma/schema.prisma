@@ -22,13 +22,15 @@ model User {
   currentTrackId    String?
   currentPlayTime   Float    @default(0)
   currentPlayListId String?
+  userAlbumIds      String[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  accounts  Account[] // Social Accounts
-  albums    Album[]
-  playLists PlayList[]
-  Queue     Queue?
+  accounts   Account[] // Social Accounts
+  playLists  PlayList[]
+  Queue      Queue?
+  orders     Order[]
+  userAlbums UserAlbum[]
 }
 
 model Account {
@@ -96,6 +98,7 @@ model Album {
   albumArtURL String
   albumType   String
   albumInfo   String?
+  price       Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   releasedAt  DateTime?
@@ -104,7 +107,6 @@ model Album {
   artistId String
   tracks   Track[]
   genres   Genre[]
-  users    User[]
 }
 
 model Track {
@@ -128,4 +130,42 @@ model Genre {
   genre String @unique
 
   Albums Album[]
+}
+
+enum ProgressStep {
+  CHECKING
+  PAID
+  DELIVERING
+  DELIVERED
+}
+
+model Order {
+  id         String       @id @default(uuid())
+  token      String?      @unique()
+  productIds String[]
+  quantities Int[]        @default([])
+  progress   ProgressStep @default(CHECKING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
+}
+
+enum UserAlbumType {
+  NORMAL
+  LIMITED
+  SIGNED
+}
+
+model UserAlbum {
+  id            String        @id @default(uuid())
+  albumId       String
+  albumCode     String
+  userAlbumType UserAlbumType @default(NORMAL)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }

@@ -22,6 +22,9 @@ export class UpdateUserDTO {
   readonly image: string;
 
   @IsOptional()
+  readonly userAlbumIds: string[];
+
+  @IsOptional()
   @IsString()
   readonly hashedPassword: string;
 }

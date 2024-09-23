@@ -8,6 +8,7 @@ import { ArtistsModule } from "./api/artists/artists.module";
 import { TracksModule } from "./api/tracks/tracks.module";
 import { AuthModule } from "./api/auth/auth.module";
 import { UsersModule } from "./api/users/users.module";
+import { PaymentsModule } from "./api/payments/payments.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from "./api/users/users.module";
     AuthModule,
     TracksModule,
     UsersModule,
+    PaymentsModule,
   ],
   controllers: [PlayceController],
   providers: [PlayceService],

@@ -25,6 +25,10 @@ export class CreateAlbumDTO {
   readonly artistId: string;
 
   @IsOptional()
+  @IsString()
+  readonly price: number;
+
+  @IsOptional()
   @IsDate()
   releasedAt: Date;
 }

@@ -60,7 +60,7 @@ export class AuthService {
       isLogin = false;
 
       const result = await this.userService.createTempUser({
-        email: null,
+        email,
         image,
         name,
         hashedPassword: null,
