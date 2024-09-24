@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional, IsString, IsArray } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateTrackDTO {
   @IsString()
@@ -17,6 +18,7 @@ export class CreateTrackDTO {
   @IsString()
   trackURL: string;
 
+  @Type(() => Number)
   @IsNumber()
   readonly trackNumber: number;
 
