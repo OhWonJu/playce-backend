@@ -43,13 +43,12 @@ export class AuthController {
   @UseGuards(PassporAuthGuard("google"))
   @Get("v2/google/callback")
   async googleAuthCallback(@Req() req, @Res() res) {
-    const CLIENT_URL = this.configServie.get("CLIENT_URL");
+    const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
 
     const result = await this.authService.googleOAuth2(req.user);
 
     res.cookie("playce_access_token", result.accessToken, {
-      domain: CLIENT_URL,
-      // path: "/",
+      domain: CLIENT_DOMAIN,
       secure: true,
       sameSite: "none",
       httpOnly: true,
@@ -58,30 +57,30 @@ export class AuthController {
 
     if (result.isLogin) {
       res.cookie("playce_expires_at", result.expiresAt, {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000,
       });
 
       res.cookie("playce_refresh_token", result.refreshToken, {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         httpOnly: true,
         secure: true,
         sameSite: "none",
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect(`${CLIENT_URL}/home`);
+      res.redirect(`${CLIENT_DOMAIN}/home`);
     } else {
-      res.redirect(`${CLIENT_URL}/join?email=${result.email}`);
+      res.redirect(`${CLIENT_DOMAIN}/join?email=${result.email}`);
     }
   }
 
   // @UseGuards(AuthGuard)
   @Post("refresh")
   async refreshToken(@Req() req, @Res() res): Promise<MutationResponse> {
-    const CLIENT_URL = this.configServie.get("CLIENT_URL");
+    const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
 
     const accessToken = req.cookies["playce_access_token"];
     const refreshToken = req.cookies["playce_refresh_token"];
@@ -93,7 +92,7 @@ export class AuthController {
 
     if (rest.ok) {
       res.cookie("playce_access_token", data.accessToken, {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -101,7 +100,7 @@ export class AuthController {
       });
 
       res.cookie("playce_expires_at", data.expiresAt, {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
@@ -111,7 +110,7 @@ export class AuthController {
       return rest;
     } else {
       res.cookie("playce_access_token", "", {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -119,12 +118,14 @@ export class AuthController {
       });
 
       res.cookie("playce_expires_at", "", {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
+        secure: true,
+        sameSite: "none",
         maxAge: 0,
       });
 
       res.cookie("playce_refresh_token", "", {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
