@@ -58,6 +58,7 @@ export class AuthController {
 
     if (result.isLogin) {
       res.cookie("playce_expires_at", result.expiresAt, {
+        sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000,
       });
 
@@ -94,6 +95,7 @@ export class AuthController {
       });
 
       res.cookie("playce_expires_at", data.expiresAt, {
+        sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
 
@@ -108,6 +110,7 @@ export class AuthController {
       });
 
       res.cookie("playce_expires_at", "", {
+        sameSite: "none",
         maxAge: 0,
       });
 
