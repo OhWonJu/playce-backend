@@ -44,6 +44,8 @@ export class AuthController {
     res.cookie("playce_access_token", result.accessToken, {
       // domain: "localhost",
       // path: "/",
+      secure: true,
+      sameSite: "none",
       httpOnly: true,
       maxAge: 90 * 24 * 60 * 60 * 1000,
     });
@@ -55,6 +57,8 @@ export class AuthController {
 
       res.cookie("playce_refresh_token", result.refreshToken, {
         httpOnly: true,
+        secure: true,
+        sameSite: "none",
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
@@ -77,6 +81,8 @@ export class AuthController {
 
     if (rest.ok) {
       res.cookie("playce_access_token", data.accessToken, {
+        secure: true,
+        sameSite: "none",
         httpOnly: true,
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
@@ -89,6 +95,8 @@ export class AuthController {
       return rest;
     } else {
       res.cookie("playce_access_token", "", {
+        secure: true,
+        sameSite: "none",
         httpOnly: true,
         maxAge: 0,
       });
@@ -98,6 +106,8 @@ export class AuthController {
       });
 
       res.cookie("playce_refresh_token", "", {
+        secure: true,
+        sameSite: "none",
         httpOnly: true,
         maxAge: 0,
       });
