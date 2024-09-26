@@ -69,6 +69,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Put("/logout")
   async Logout(@Request() req, @Res() res): Promise<MutationResponse> {
+    const CLIENT_URL = this.configServie.get("CLIENT_URL");
     const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
 
     const existUser = await this.usersService.getMe(req.user.sub);
@@ -82,14 +83,14 @@ export class UsersController {
     }
 
     res.cookie("playce_access_token", "", {
-      domain: CLIENT_DOMAIN,
+      domain: CLIENT_URL,
       secure: true,
       httpOnly: true,
       maxAge: 0,
     });
 
     res.cookie("playce_refresh_token", "", {
-      domain: CLIENT_DOMAIN,
+      domain: CLIENT_URL,
       secure: true,
       httpOnly: true,
       maxAge: 0,

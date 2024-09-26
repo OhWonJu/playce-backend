@@ -36,7 +36,7 @@ export class AuthController {
     const result = await this.authService.googleOAuth2(req.user);
 
     res.cookie("playce_access_token", result.accessToken, {
-      domain: CLIENT_DOMAIN,
+      domain: CLIENT_URL,
       secure: true,
       sameSite: "none",
       httpOnly: true,
@@ -45,7 +45,7 @@ export class AuthController {
 
     if (result.isLogin) {
       res.cookie("playce_refresh_token", result.refreshToken, {
-        domain: CLIENT_DOMAIN,
+        domain: CLIENT_URL,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -61,6 +61,7 @@ export class AuthController {
   // @UseGuards(AuthGuard)
   @Post("refresh")
   async refreshToken(@Req() req, @Res() res): Promise<MutationResponse> {
+    const CLIENT_URL = this.configServie.get("CLIENT_URL");
     const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
 
     const accessToken = req.cookies["playce_access_token"];
@@ -73,7 +74,7 @@ export class AuthController {
 
     if (rest.ok) {
       res.cookie("playce_access_token", data.accessToken, {
-        domain: CLIENT_DOMAIN,
+        domain: CLIENT_URL,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -84,7 +85,7 @@ export class AuthController {
       return rest;
     } else {
       res.cookie("playce_access_token", "", {
-        domain: CLIENT_DOMAIN,
+        domain: CLIENT_URL,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -92,7 +93,7 @@ export class AuthController {
       });
 
       res.cookie("playce_refresh_token", "", {
-        domain: CLIENT_DOMAIN,
+        domain: CLIENT_URL,
         secure: true,
         sameSite: "none",
         httpOnly: true,
