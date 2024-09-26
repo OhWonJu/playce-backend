@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthGuard as PassporAuthGuard } from "@nestjs/passport";
+import { ConfigService } from "@nestjs/config";
 
 import { AuthService } from "./auth.service";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
@@ -19,7 +20,10 @@ import { AuthGuard } from "./auth.guard";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configServie: ConfigService,
+  ) {}
 
   // @HttpCode(HttpStatus.OK)
   // @Post("login")
@@ -39,6 +43,8 @@ export class AuthController {
   @UseGuards(PassporAuthGuard("google"))
   @Get("v2/google/callback")
   async googleAuthCallback(@Req() req, @Res() res) {
+    const CLIENT_URL = this.configServie.get("CLIENT_URL");
+
     const result = await this.authService.googleOAuth2(req.user);
 
     res.cookie("playce_access_token", result.accessToken, {
@@ -62,9 +68,9 @@ export class AuthController {
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect("http://localhost:5173/home");
+      res.redirect(`${CLIENT_URL}/home`);
     } else {
-      res.redirect(`http://localhost:5173/join?email=${result.email}`);
+      res.redirect(`${CLIENT_URL}/join?email=${result.email}`);
     }
   }
 
