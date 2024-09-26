@@ -52,7 +52,7 @@ export class AuthController {
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect(`${CLIENT_URL}/home`);
+      res.redirect(`${CLIENT_URL}/oauth/callback?expired=${result.expiresAt}`);
     } else {
       res.redirect(`${CLIENT_URL}/join?email=${result.email}`);
     }
