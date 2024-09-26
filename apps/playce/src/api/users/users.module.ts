@@ -8,6 +8,7 @@ import { UsersController } from "./users.controller";
 import { PlayListModule } from "@lib/crud/play-list/play-list.module";
 import { QueueModule } from "@lib/crud/queue/queue.module";
 import { DatabaseModule } from "@lib";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DatabaseModule } from "@lib";
     PlayListModule,
     QueueModule,
     DatabaseModule,
+    ConfigModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

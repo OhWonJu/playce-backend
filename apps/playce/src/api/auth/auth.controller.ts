@@ -1,22 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  Request,
-  Res,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthGuard as PassporAuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
 
 import { AuthService } from "./auth.service";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
-
-import { AuthGuard } from "./auth.guard";
 
 @Controller("auth")
 export class AuthController {
@@ -57,18 +44,11 @@ export class AuthController {
     });
 
     if (result.isLogin) {
-      res.cookie("playce_expires_at", result.expiresAt, {
-        domain: CLIENT_DOMAIN,
-        secure: true,
-        sameSite: "none",
-        maxAge: 90 * 24 * 60 * 60 * 1000,
-      });
-
       res.cookie("playce_refresh_token", result.refreshToken, {
         domain: CLIENT_DOMAIN,
-        httpOnly: true,
         secure: true,
         sameSite: "none",
+        httpOnly: true,
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
@@ -100,13 +80,6 @@ export class AuthController {
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
 
-      res.cookie("playce_expires_at", data.expiresAt, {
-        domain: CLIENT_DOMAIN,
-        secure: true,
-        sameSite: "none",
-        maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
-      });
-
       res.send(rest);
       return rest;
     } else {
@@ -115,13 +88,6 @@ export class AuthController {
         secure: true,
         sameSite: "none",
         httpOnly: true,
-        maxAge: 0,
-      });
-
-      res.cookie("playce_expires_at", "", {
-        domain: CLIENT_DOMAIN,
-        secure: true,
-        sameSite: "none",
         maxAge: 0,
       });
 

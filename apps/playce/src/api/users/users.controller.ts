@@ -14,12 +14,11 @@ import {
 } from "@nestjs/common";
 
 import { UsersService } from "./users.service";
-import { getUserProfileDTO } from "./dto/getUserProfile.DTO";
 import { AuthGuard } from "../auth/auth.guard";
 import { getMeDTO } from "./dto/getMe.DTO";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
-import { Album, PlayList, Queue, Track } from "@prisma/client";
+import { PlayList } from "@prisma/client";
 import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
 import { UpdatePlayListDTO } from "@lib/crud/play-list/dto/updatePlayList.DTO";
 import { UpdateQueueDTO } from "@lib/crud/queue/dto/updateQueue.DTO";
@@ -28,15 +27,16 @@ import { UNAUTHORIZED } from "utils/errorCodes";
 import { GetSummaryDTO } from "./dto/getSummary.DTO";
 import { getQueueDTO } from "./dto/getQueueDTO";
 import { GetPlaylistsResponse } from "./dto/getPlaylistsResponse";
-import {
-  GetAlbumsResponse,
-  GetUserAlbumsResponse,
-} from "./dto/getAlbumsResponse";
+import { GetUserAlbumsResponse } from "./dto/getAlbumsResponse";
 import { CreateUserAlbumDTO } from "@lib/crud/user/dto/createUserAlbum.DTO";
+import { ConfigService } from "@nestjs/config";
 
 @Controller("users")
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private configServie: ConfigService,
+  ) {}
 
   // 유저 생성
   @Post("/create")
@@ -69,6 +69,8 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Put("/logout")
   async Logout(@Request() req, @Res() res): Promise<MutationResponse> {
+    const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
+
     const existUser = await this.usersService.getMe(req.user.sub);
 
     if (!existUser) {
@@ -80,15 +82,15 @@ export class UsersController {
     }
 
     res.cookie("playce_access_token", "", {
+      domain: CLIENT_DOMAIN,
+      secure: true,
       httpOnly: true,
       maxAge: 0,
     });
 
-    res.cookie("playce_expires_at", "", {
-      maxAge: 0,
-    });
-
     res.cookie("playce_refresh_token", "", {
+      domain: CLIENT_DOMAIN,
+      secure: true,
       httpOnly: true,
       maxAge: 0,
     });
