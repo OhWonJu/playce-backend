@@ -81,8 +81,11 @@ export class AuthController {
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
 
-      res.send(rest);
-      return rest;
+      const result = { ...rest } as MutationResponse;
+      result.data = data.expiresAt;
+
+      res.send(result);
+      return result;
     } else {
       res.cookie("playce_access_token", "", {
         // domain: CLIENT_URL,
