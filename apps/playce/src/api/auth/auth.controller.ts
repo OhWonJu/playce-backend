@@ -43,6 +43,7 @@ export class AuthController {
   @UseGuards(PassporAuthGuard("google"))
   @Get("v2/google/callback")
   async googleAuthCallback(@Req() req, @Res() res) {
+    const CLIENT_URL = this.configServie.get("CLIENT_URL");
     const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
 
     const result = await this.authService.googleOAuth2(req.user);
@@ -71,9 +72,9 @@ export class AuthController {
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect(`${CLIENT_DOMAIN}/home`);
+      res.redirect(`${CLIENT_URL}/home`);
     } else {
-      res.redirect(`${CLIENT_DOMAIN}/join?email=${result.email}`);
+      res.redirect(`${CLIENT_URL}/join?email=${result.email}`);
     }
   }
 
