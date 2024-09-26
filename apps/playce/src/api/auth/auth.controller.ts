@@ -59,6 +59,8 @@ export class AuthController {
     if (result.isLogin) {
       res.cookie("playce_expires_at", result.expiresAt, {
         domain: CLIENT_URL,
+        secure: true,
+        sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000,
       });
 
@@ -100,6 +102,8 @@ export class AuthController {
 
       res.cookie("playce_expires_at", data.expiresAt, {
         domain: CLIENT_URL,
+        secure: true,
+        sameSite: "none",
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
 
