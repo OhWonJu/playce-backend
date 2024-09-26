@@ -189,6 +189,9 @@ export class PlayListService {
       await this.prisma.$transaction([updatedPlaylist]);
       return {
         ok: true,
+        data: {
+          playlistId: playListId,
+        },
       };
     } catch (error) {
       return {
