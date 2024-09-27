@@ -41,7 +41,7 @@ export class AlbumsController {
   }
 
   @Public()
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("/recommend")
   async getRecommendedAlbums(@Request() req): Promise<Album[]> {
     return await this.albumsService.getAllAlbum();
