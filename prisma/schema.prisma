@@ -62,7 +62,7 @@ model PlayList {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
   tracks Json[]
 }
@@ -74,7 +74,7 @@ model Queue {
   totalPlayTime  Int    @default(0)
   tracks         Json[]
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
 }
 
@@ -103,7 +103,7 @@ model Album {
   updatedAt   DateTime  @updatedAt
   releasedAt  DateTime?
 
-  artist   Artist  @relation(fields: [artistId], references: [id])
+  artist   Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
   artistId String
   tracks   Track[]
   genres   Genre[]
@@ -121,7 +121,7 @@ model Track {
   peaks       Float[]
 
   // relation
-  Album   Album  @relation(fields: [albumId], references: [id])
+  Album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumId String
 }
 
@@ -148,7 +148,7 @@ model Order {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
-  User   User?   @relation(fields: [userId], references: [id])
+  User   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String?
 }
 
@@ -166,6 +166,6 @@ model UserAlbum {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  User   User?   @relation(fields: [userId], references: [id])
+  User   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String?
 }

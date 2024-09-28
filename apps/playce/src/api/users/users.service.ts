@@ -1,12 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { Album, PlayList, Prisma, Queue, Track } from "@prisma/client";
+import { PlayList, Track } from "@prisma/client";
 import * as _ from "lodash";
 
 import { UserService } from "@lib/crud/user/user.service";
 import { CreateUserDTO } from "@lib/crud/user/dto/createUser.DTO";
 import { MutationResponse } from "utils/decorators/types/mutationResopnse";
 
-import { getUserProfileDTO } from "./dto/getUserProfile.DTO";
 import { AlbumService } from "@lib/crud/album/album.service";
 import { GetAlbumsDTO } from "@lib/crud/album/dto/getAlbums.DTO";
 import { CreatePlayListDTO } from "@lib/crud/play-list/dto/createPlayList.DTO";
@@ -30,7 +29,6 @@ export class UsersService {
     private prisma: DatabaseService,
     private userService: UserService,
     private userAlbumService: UserAlbumService,
-    private albumService: AlbumService,
     private playListService: PlayListService,
     private queueService: QueueService,
   ) {}
@@ -61,6 +59,26 @@ export class UsersService {
 
   //   return profile;
   // }
+
+  async deleteUser(userId: string): Promise<MutationResponse> {
+    try {
+      await this.prisma.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        errorCode: 500,
+        error: "failed delete user",
+      };
+    }
+  }
 
   async getSummary(userId: string): Promise<GetSummaryDTO> {
     const user = await this.prisma.user.findUnique({

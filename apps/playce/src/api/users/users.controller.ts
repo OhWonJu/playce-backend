@@ -145,6 +145,12 @@ export class UsersController {
   // 유저 정보 수정
 
   // 유저 삭제
+  @UseGuards(AuthGuard)
+  @Put("/delete/user")
+  async deleteUser(@Request() req, @Res() res): Promise<MutationResponse> {
+    await this.Logout(req, res);
+    return await this.usersService.deleteUser(req.user.sub);
+  }
 
   // 플레이리스트 생성하기
   @UseGuards(AuthGuard)
