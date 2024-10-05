@@ -83,14 +83,14 @@ export class UsersController {
     }
 
     res.cookie("playce_access_token", "", {
-      // domain: CLIENT_URL,
+      domain: CLIENT_DOMAIN,
       secure: true,
       httpOnly: true,
       maxAge: 0,
     });
 
     res.cookie("playce_refresh_token", "", {
-      // domain: CLIENT_URL,
+      domain: CLIENT_DOMAIN,
       secure: true,
       httpOnly: true,
       maxAge: 0,

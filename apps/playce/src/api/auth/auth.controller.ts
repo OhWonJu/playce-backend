@@ -36,7 +36,7 @@ export class AuthController {
     const result = await this.authService.googleOAuth2(req.user);
 
     res.cookie("playce_access_token", result.accessToken, {
-      // domain: CLIENT_URL,
+      domain: CLIENT_DOMAIN,
       secure: true,
       sameSite: "none",
       httpOnly: true,
@@ -45,7 +45,7 @@ export class AuthController {
 
     if (result.isLogin) {
       res.cookie("playce_refresh_token", result.refreshToken, {
-        // domain: CLIENT_URL,
+        domain: CLIENT_URL,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -74,7 +74,7 @@ export class AuthController {
 
     if (rest.ok) {
       res.cookie("playce_access_token", data.accessToken, {
-        // domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -88,7 +88,7 @@ export class AuthController {
       return result;
     } else {
       res.cookie("playce_access_token", "", {
-        // domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
@@ -96,7 +96,7 @@ export class AuthController {
       });
 
       res.cookie("playce_refresh_token", "", {
-        // domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
