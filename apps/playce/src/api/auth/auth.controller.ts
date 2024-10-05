@@ -45,7 +45,7 @@ export class AuthController {
 
     if (result.isLogin) {
       res.cookie("playce_refresh_token", result.refreshToken, {
-        domain: CLIENT_URL,
+        domain: CLIENT_DOMAIN,
         secure: true,
         sameSite: "none",
         httpOnly: true,
