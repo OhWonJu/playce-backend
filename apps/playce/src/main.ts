@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 
 import { DatabaseService } from "@lib/database/database.service";
 
@@ -24,6 +25,7 @@ async function bootstrap() {
   );
 
   app.use(cookieParser());
+  app.use(compression());
 
   await app.listen(4000);
 }
