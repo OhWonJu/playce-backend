@@ -38,7 +38,7 @@ export class AuthController {
     res.cookie("playce_access_token", result.accessToken, {
       domain: CLIENT_DOMAIN,
       secure: true,
-      sameSite: "none",
+      sameSite: "strict",
       httpOnly: true,
       maxAge: 90 * 24 * 60 * 60 * 1000,
     });
@@ -47,7 +47,7 @@ export class AuthController {
       res.cookie("playce_refresh_token", result.refreshToken, {
         domain: CLIENT_DOMAIN,
         secure: true,
-        sameSite: "none",
+        sameSite: "strict",
         httpOnly: true,
         maxAge: 365 * 24 * 60 * 60 * 1000,
       });
@@ -76,7 +76,7 @@ export class AuthController {
       res.cookie("playce_access_token", data.accessToken, {
         domain: CLIENT_DOMAIN,
         secure: true,
-        sameSite: "none",
+        sameSite: "strict",
         httpOnly: true,
         maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
       });
@@ -90,7 +90,7 @@ export class AuthController {
       res.cookie("playce_access_token", "", {
         domain: CLIENT_DOMAIN,
         secure: true,
-        sameSite: "none",
+        sameSite: "strict",
         httpOnly: true,
         maxAge: 0,
       });
@@ -98,7 +98,7 @@ export class AuthController {
       res.cookie("playce_refresh_token", "", {
         domain: CLIENT_DOMAIN,
         secure: true,
-        sameSite: "none",
+        sameSite: "strict",
         httpOnly: true,
         maxAge: 0,
       });
