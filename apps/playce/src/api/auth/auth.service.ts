@@ -146,6 +146,41 @@ export class AuthService {
     }
   }
 
+  async demoUser() {
+    const account = await this.accountService.findAccount({
+      provider_providerAccountId: {
+        provider: "demo-provider",
+        providerAccountId: "demo-account",
+      },
+    });
+
+    const serviceToken = await this.generateAccessToken({
+      sub: "demo-user",
+      username: "Demo User",
+    });
+    const serviceRefreshToken = await this.generateRefreshToken({
+      sub: "demo-user",
+      accountname: `demo-provider+demo-account`,
+    });
+
+    const parsedToken = this.jwtService.verify(serviceToken, {
+      secret: this.configService.get<string>("PRIVATE_KEY"),
+    });
+
+    account.access_token = serviceToken;
+    account.expires_at = parsedToken.exp;
+    account.refresh_token = serviceRefreshToken;
+
+    await this.accountService.updateAccount(account);
+
+    return {
+      isLogin: true,
+      accessToken: serviceToken,
+      expiresAt: parsedToken.exp,
+      refreshToken: serviceRefreshToken,
+    };
+  }
+
   async refresh(refreshTokenDTO: RefreshTokenDTO): Promise<MutationResponse> {
     const { accessToken, refreshToken } = refreshTokenDTO;
 

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthGuard as PassporAuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
 
@@ -56,6 +64,32 @@ export class AuthController {
     } else {
       res.redirect(`${CLIENT_URL}/join?email=${result.email}`);
     }
+  }
+
+  @Put("demo-user")
+  async demoUserCallback(@Res() res) {
+    const CLIENT_DOMAIN = this.configServie.get("CLIENT_DOMAIN");
+
+    const result = await this.authService.demoUser();
+
+    res.cookie("playce_access_token", result.accessToken, {
+      domain: CLIENT_DOMAIN,
+      secure: true,
+      sameSite: "strict",
+      httpOnly: true,
+      maxAge: 90 * 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie("playce_refresh_token", result.refreshToken, {
+      domain: CLIENT_DOMAIN,
+      secure: true,
+      sameSite: "strict",
+      httpOnly: true,
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+    });
+
+    res.send({ expiresAt: result.expiresAt });
+    // res.redirect(`${CLIENT_URL}/oauth/callback?expired=${result.expiresAt}`);
   }
 
   // @UseGuards(AuthGuard)
