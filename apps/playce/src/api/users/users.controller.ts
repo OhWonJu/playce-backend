@@ -151,6 +151,10 @@ export class UsersController {
   @Put("/delete/user")
   async deleteUser(@Request() req, @Res() res): Promise<MutationResponse> {
     await this.Logout(req, res);
+
+    // DEMO-USER
+    if (req.user.sub === "demo-user") return { ok: true };
+
     return await this.usersService.deleteUser(req.user.sub);
   }
 
