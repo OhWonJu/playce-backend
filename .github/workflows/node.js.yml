@@ -1,0 +1,55 @@
+name: NestJS-playce-server
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Display Node version
+        run : echo node -v
+
+      - name: Create .env file
+        run: echo "${{ secrets.ENV }}" > .env
+
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: devpio/playce-server
+          tags: v1, latest
+          registry: docker.io
+          dockerfile: dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: EC2 deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }} # AWS EC2 인스턴스의 퍼블릭 IPv4 DNS
+          username: ${{ secrets.EC2_USERNAME }} # EC2 내 우분투 아이디
+          key: ${{ secrets.EC2_PEM_KEY }} # EC2 instance pem key
+          port: ${{ secrets.EC2_SSH_PORT }} # 접속포트 Default 22
+          script: |
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ secrets.DOCKER_PASSWORD }}
+
+            CONTAINER_ID=$(sudo docker ps -q --filter "publish=4000-4000")
+
+            if [ ! -z "$CONTAINER_ID" ]; then
+            sudo docker stop $CONTAINER_ID
+            sudo docker rm $CONTAINER_ID
+            fi
+            
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/playce-server
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/playce-server
+            sudo docker run -d --name flashlight-ec2 -p 4000:4000 ${{ secrets.DOCKER_USERNAME }}/playce-server
