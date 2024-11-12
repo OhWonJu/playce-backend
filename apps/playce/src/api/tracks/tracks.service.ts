@@ -3,7 +3,8 @@ import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import { join } from "path";
-import { promises as fs } from "fs";
+import { chownSync, promises as fs } from "fs";
+import * as _ from "lodash";
 
 import { TrackService } from "@lib/crud/track/track.service";
 import { CreateTrackDTO } from "@lib/crud/track/dto/createTrack.DTO";
@@ -103,17 +104,52 @@ export class TracksService {
 
     // 2. PCM 파일을 읽고 부동소수점 배열로 변환
     const pcmData = await fs.readFile(tempPCMPath);
-    const waveform = [];
+    // const waveform = [];
+    const chunkSize = Math.ceil(pcmData.length / 300);
 
-    for (let i = 0; i < pcmData.length; i += 2 * downsampleFactor) {
-      const int16Sample = pcmData.readInt16LE(i);
-      waveform.push(int16Sample / 32768); // -1.0 ~ 1.0 범위로 정규화
+    function bufferChunk(buffer, chunkSize) {
+      const chunks = [];
+      for (let i = 0; i < buffer.length; i += chunkSize) {
+        const end = Math.min(i + chunkSize, buffer.length);
+        chunks.push(buffer.slice(i, end));
+      }
+      return chunks;
     }
+
+    const peaks = _.chain(bufferChunk(pcmData, chunkSize))
+      .map((chuck) => {
+        const samples = [];
+        // 샘플 사이즈 변경 발생 지점
+        for (let i = 0; i < chuck.length; i += 2) {
+          samples.push(chuck.readInt16LE(i) / 32768);
+          break;
+        }
+
+        // samples.sort((a, b) => a - b);
+        // const midIndex = Math.floor(samples.length / 2);
+
+        // const median =
+        //   samples.length % 2 !== 0
+        //     ? samples[midIndex]
+        //     : (samples[midIndex - 1] + samples[midIndex]) / 2;
+
+        // return median;
+        return samples[0];
+      })
+      .value();
+
+    // 잔체 길이에 대해 300 개만 취하는 방법은?
+    // 300 등분.
+    // 300 단위마다의 평균치.
+    // for (let i = 0; i < pcmData.length; i += 2 * downsampleFactor) {
+    //   const int16Sample = pcmData.readInt16LE(i);
+    //   waveform.push(int16Sample / 32768); // -1.0 ~ 1.0 범위로 정규화
+    // }
 
     // 임시 PCM 파일 삭제
     await fs.unlink(tempPCMPath);
 
-    return waveform;
+    return peaks;
   }
 
   async createTrack(

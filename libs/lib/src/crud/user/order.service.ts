@@ -23,6 +23,8 @@ export class OrderService {
   }
 
   async createOrder(createOrderDTO: CreateOrderDTO): Promise<MutationResponse> {
+    // TODO 오더 정보 정합석 확인 로직 필요
+
     const newOrder = await this.saveOrder(createOrderDTO);
 
     if (newOrder) {
