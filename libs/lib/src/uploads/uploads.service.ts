@@ -20,6 +20,7 @@ export class UploadsService {
 
   async uploadToS3(file: any, folderName: string, useDateKey?: boolean) {
     const bucket = this.configService.get<string>("AWS_BUCKET_NAME");
+    const cloudFrontDomain = this.configService.get<string>("AWS_CF_DOMAIN");
     const key = useDateKey
       ? `${folderName}/${Date.now()}_${file.originalname}`
       : `${folderName}/${file.originalname}`;
@@ -36,8 +37,9 @@ export class UploadsService {
         this.S3.config.region(),
       ]);
 
-      const url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-      return url;
+      // const url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+      const cf_url = `https://${cloudFrontDomain}/${key}`;
+      return cf_url;
     } catch (error) {
       console.log("Error", error);
     }
