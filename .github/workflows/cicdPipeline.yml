@@ -52,4 +52,4 @@ jobs:
             
             sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/playce-server
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/playce-server
-            sudo docker run -d --name flashlight-ec2 -p 4000:4000 ${{ secrets.DOCKER_USERNAME }}/playce-server
+            sudo docker run -d --name playce-ec2 -p 4000:4000 ${{ secrets.DOCKER_USERNAME }}/playce-server
