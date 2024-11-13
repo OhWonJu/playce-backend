@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(PlayceModule);
 
   app.enableCors({
-    origin: process.env.CLIENT_URL, // React 클라이언트 주소
+    origin: [process.env.CLIENT_URL, process.env.TEST_CLIENT_URL], // React 클라이언트 주소
     credentials: true,
   });
 
